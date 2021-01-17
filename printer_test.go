@@ -98,6 +98,33 @@ func TestJobs(t *testing.T) {
 				b, err := json.MarshalIndent(j, "", "   ")
 				if err == nil && len(b) > 0 {
 					t.Log(string(b))
+
+					err := p.PauseJob(&j)
+					if err != nil {
+						t.Log("Pause job error:", j.JobID, j.DocumentName, err.Error())
+					} else {
+						t.Log("Pause Job success:", j.JobID, j.DocumentName)
+					}
+					err = p.ResumeJob(&j)
+					if err != nil {
+						t.Log("Resume job error:", j.JobID, j.DocumentName, err.Error())
+					} else {
+						t.Log("Resume Job success:", j.JobID, j.DocumentName)
+					}
+					err = p.CancelJob(&j)
+					if err != nil {
+						t.Log("Cancel job error:", j.JobID, j.DocumentName, err.Error())
+					} else {
+						t.Log("Cancel Job success:", j.JobID, j.DocumentName)
+					}
+
+					err = p.DeleteJob(&j)
+					if err != nil {
+						t.Log("Delete job error:", j.JobID, j.DocumentName, err.Error())
+					} else {
+						t.Log("Delete Job success:", j.JobID, j.DocumentName)
+					}
+
 				}
 			}
 		}

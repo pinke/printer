@@ -97,6 +97,16 @@ const (
 	JOB_STATUS_COMPLETE          = 0x00001000 // Job has been delivered to the printer
 	JOB_STATUS_RETAINED          = 0x00002000 // Job has been retained in the print queue
 	JOB_STATUS_RENDERING_LOCALLY = 0x00004000 // Job rendering locally on the client
+
+	JOB_CONTROL_PAUSE             = 1
+	JOB_CONTROL_RESUME            = 2
+	JOB_CONTROL_CANCEL            = 3
+	JOB_CONTROL_RESTART           = 4
+	JOB_CONTROL_DELETE            = 5
+	JOB_CONTROL_SENT_TO_PRINTER   = 6
+	JOB_CONTROL_LAST_PAGE_EJECTED = 7
+	JOB_CONTROL_RETAIN            = 8
+	JOB_CONTROL_RELEASE           = 9
 )
 
 //sys	GetDefaultPrinter(buf *uint16, bufN *uint32) (err error) = winspool.GetDefaultPrinterW
@@ -110,6 +120,7 @@ const (
 //sys	EnumPrinters(flags uint32, name *uint16, level uint32, buf *byte, bufN uint32, needed *uint32, returned *uint32) (err error) = winspool.EnumPrintersW
 //sys	GetPrinterDriver(h syscall.Handle, env *uint16, level uint32, di *byte, n uint32, needed *uint32) (err error) = winspool.GetPrinterDriverW
 //sys	EnumJobs(h syscall.Handle, firstJob uint32, noJobs uint32, level uint32, buf *byte, bufN uint32, bytesNeeded *uint32, jobsReturned *uint32) (err error) = winspool.EnumJobsW
+//sys	SetJob(h syscall.Handle, jobId uint32, level uint32, options *JOB_INFO_1,cmd uint32 ) (err error) = winspool.SetJobW
 
 func Default() (string, error) {
 	b := make([]uint16, 3)
@@ -376,4 +387,35 @@ func (p *Printer) EndPage() error {
 
 func (p *Printer) Close() error {
 	return ClosePrinter(p.h)
+}
+
+//pinke: same job future (base on SetJob):
+//see:  https://docs.microsoft.com/en-us/windows/win32/printdocs/setjob
+
+func (p *Printer) DeleteJob(info *JobInfo) error {
+	return SetJob(p.h, info.JobID, 0, nil, JOB_CONTROL_DELETE)
+}
+func (p *Printer) PauseJob(info *JobInfo) error {
+	return SetJob(p.h, info.JobID, 0, nil, JOB_CONTROL_PAUSE)
+}
+func (p *Printer) CancelJob(info *JobInfo) error {
+	return SetJob(p.h, info.JobID, 0, nil, JOB_CONTROL_CANCEL)
+}
+func (p *Printer) ResumeJob(info *JobInfo) error {
+	return SetJob(p.h, info.JobID, 0, nil, JOB_CONTROL_RESUME)
+}
+func (p *Printer) RestartJob(info *JobInfo) error {
+	return SetJob(p.h, info.JobID, 0, nil, JOB_CONTROL_RESTART)
+}
+func (p *Printer) SendToPrinterJob(info *JobInfo) error {
+	return SetJob(p.h, info.JobID, 0, nil, JOB_CONTROL_SENT_TO_PRINTER)
+}
+func (p *Printer) LastPageEjectedJob(info *JobInfo) error {
+	return SetJob(p.h, info.JobID, 0, nil, JOB_CONTROL_LAST_PAGE_EJECTED)
+}
+func (p *Printer) ReleaseJob(info *JobInfo) error {
+	return SetJob(p.h, info.JobID, 0, nil, JOB_CONTROL_RELEASE)
+}
+func (p *Printer) RetainJob(info *JobInfo) error {
+	return SetJob(p.h, info.JobID, 0, nil, JOB_CONTROL_RETAIN)
 }

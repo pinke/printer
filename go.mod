@@ -1,4 +1,4 @@
-module github.com/alexbrainman/printer
+module github.com/pinke/printer
 
 go 1.16
 
